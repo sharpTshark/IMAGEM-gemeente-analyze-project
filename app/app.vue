@@ -1,10 +1,10 @@
 <template>
-	<div>
+	<main class="flex-1 overflow-x-hidden">
 
 		<navbar :navbarItems="navbarItems" />
 
 		<nuxt-page />
-	</div>
+	</main>
 </template>
 
 
@@ -29,3 +29,11 @@ export default {
 }
 
 </script>
+
+
+<style>
+html {
+	overflow-y: auto;
+	scrollbar-gutter: stable;
+}
+</style>
