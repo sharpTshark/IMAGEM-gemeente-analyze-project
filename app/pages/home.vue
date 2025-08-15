@@ -280,7 +280,7 @@
 							</div>
 
 
-							<Table></Table>
+							<TableEl />
 
 						</div>
 					</div>

@@ -43,7 +43,7 @@
 <script>
 
 export default {
-	name: "table",
+	name: "TableEl",
 	props: {
 		tableRows: {
 			type: Array,
