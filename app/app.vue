@@ -16,8 +16,8 @@ export default {
 		return {
 			navbarItems: [
 				{
-					path: "/home",
-					label: "Dashboard"
+					path: "/gemeente",
+					label: "Gemeente"
 				},
 				{
 					path: "/gemeenten",
