@@ -16,6 +16,8 @@
 </template>
 
 <script>
+import { LinesChart } from 'echarts/charts';
+
 
 export default {
 	name: "gemeenten",
@@ -28,7 +30,7 @@ export default {
 					data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 				},
 				yAxis: {
-					type: 'value'
+					type: 'value',
 				},
 				toolbox: {
 					feature: {
@@ -68,12 +70,26 @@ export default {
 					}
 				]
 			},
-			lineChart: {
+		}
+	},
+	computed: {
+		lineChart() {
+			return {
+				dataZoom: [{
+					type: 'inside',
+					id: 'insideX',
+					xAxisIndex: 0,
+					start: 0,
+					end: 50,
+					zoomOnMouseWheel: false,
+					moveOnMouseMove: true,
+					moveOnMouseWheel: true
+				}],
 				tooltip: {
 					trigger: 'axis'
 				},
 				legend: {
-					data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
+					data: this.towns.map(town => town.properties.postcode),
 				},
 				grid: {
 					left: '3%',
@@ -89,48 +105,21 @@ export default {
 				xAxis: {
 					type: 'category',
 					boundaryGap: false,
-					data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+					data: ['voor 1945', '1945 1965', '1965 1975', '1975 1985', '1985 1995', '1995 2005', '2005 2015', '2015 en erna']
 				},
 				yAxis: {
 					type: 'value'
 				},
-				series: [
-					{
-						name: 'Email',
+				series: this.towns.map(town => {
+					return {
+						name: town.properties.postcode,
 						type: 'line',
 						stack: 'Total',
-						data: [120, 132, 101, 134, 90, 230, 210]
-					},
-					{
-						name: 'Union Ads',
-						type: 'line',
-						stack: 'Total',
-						data: [220, 182, 191, 234, 290, 330, 310]
-					},
-					{
-						name: 'Video Ads',
-						type: 'line',
-						stack: 'Total',
-						data: [150, 232, 201, 154, 190, 330, 410]
-					},
-					{
-						name: 'Direct',
-						type: 'line',
-						stack: 'Total',
-						data: [320, 332, 301, 334, 390, 330, 320]
-					},
-					{
-						name: 'Search Engine',
-						type: 'line',
-						stack: 'Total',
-						data: [820, 932, 901, 934, 1290, 1330, 1320]
-					}
-				]
-
+						data: this.townHousesByYear(town)
+					};
+				})
 			}
-		}
-	},
-	computed: {
+		},
 		townsTableData() {
 
 			if (!this.towns || this.towns.length === 0) {
@@ -161,7 +150,31 @@ export default {
 		handleRowClick(row) {
 			const postcode = row.find(column => column.label === 'Postcode').value;
 			this.$router.push(`/?postcode=${postcode}`);
-		}
+		},
+		townHousesByYear(town) {
+			if (!town) {
+				return [];
+			}
+
+			const data = [
+				town.properties.aantal_woningen_bouwjaar_voor_1945,
+				town.properties.aantal_woningen_bouwjaar_45_tot_65,
+				town.properties.aantal_woningen_bouwjaar_65_tot_75,
+				town.properties.aantal_woningen_bouwjaar_75_tot_85,
+				town.properties.aantal_woningen_bouwjaar_85_tot_95,
+				town.properties.aantal_woningen_bouwjaar_95_tot_2005,
+				town.properties.aantal_woningen_bouwjaar_05_tot_15,
+				town.properties.aantal_woningen_bouwjaar_15_en_later
+			]
+
+			return data.map(value => {
+				if (value < 0) {
+					this.lineChartError = 'Negative values found';
+					return 0;
+				}
+				return value;
+			});
+		},
 	},
 	mounted() {
 		this.fetchTowns();
