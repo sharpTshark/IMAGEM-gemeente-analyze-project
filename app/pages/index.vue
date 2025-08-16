@@ -7,7 +7,7 @@
 			</card>
 
 			<card class="w-full h-72">
-				<chart id="2" :chartOptions="mapChart" :geoJsonToRegister="geojson" />
+				<chart v-if="town" id="2" :chartOptions="mapChart" :geoJsonToRegister="geojson" />
 			</card>
 		</div>
 	</main>
@@ -16,16 +16,19 @@
 
 <script>
 
-import geojson from '../../exampledata.json'
 
 export default {
 	name: "home",
 	data() {
 		return {
-			geojson: geojson,
-			pieChartOptions: {
-				title: {
-					text: 'Aantal inwoners per geslacht',
+			town: null,
+		}
+	},
+	computed: {
+		pieChartOptions() {
+			return {
+				tooltip: {
+					trigger: 'item'
 				},
 				legend: {
 					orient: 'vertical',
@@ -35,13 +38,15 @@ export default {
 					{
 						type: 'pie',
 						data: [
-							{ value: 1048, name: 'Mannen' },
-							{ value: 735, name: 'Vrouwen' },
+							{ value: this.town ? this.town.properties.aantal_mannen : 0, name: 'Mannen' },
+							{ value: this.town ? this.town.properties.aantal_vrouwen : 0, name: 'Vrouwen' },
 						],
 					}
 				]
-			},
-			mapChart: {
+			}
+		},
+		mapChart() {
+			return {
 				geo: {
 					map: 'region-2',
 					roam: true,
@@ -67,7 +72,35 @@ export default {
 					}
 				]
 			}
+		},
+		geojson() {
+			return {
+				type: "FeatureCollection",
+				features: [this.town]
+			}
+
 		}
+	},
+	methods: {
+		async queryTown(query) {
+
+			const response = await $fetch('/api/gemeenten', {
+				method: 'GET',
+				query
+			});
+
+			this.town = response.features[0];
+
+			this.$router.push(`/?postcode=${this.town.properties.postcode}`);
+		}
+	},
+	async mounted() {
+		let query = { limit: 1 }
+		if (this.$route.query.postcode) {
+			query.postcode = this.$route.query.postcode
+		}
+
+		this.queryTown(query)
 	}
 }
 
