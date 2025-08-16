@@ -12,11 +12,6 @@
 										class="py-3.5 px-4 text-left sm:px-6 text-sm whitespace-nowrap font-medium text-gray-500">
 										<div class="flex items-center">
 											{{ rowName }}
-											<svg class="w-4 h-4 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none"
-												viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-												<path stroke-linecap="round" stroke-linejoin="round"
-													d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-											</svg>
 										</div>
 									</th>
 
@@ -24,7 +19,7 @@
 							</thead>
 
 							<tbody class="divide-y divide-gray-200">
-								<tr v-for="row in tableRows">
+								<tr v-for="row in tableRows" class=" cursor-pointer" @click="$emit('row-click', row)">
 									<td v-for="column in row"
 										class="px-4 py-4 text-sm font-bold text-gray-900 sm:px-6 whitespace-nowrap">
 										{{ column.value }}
@@ -131,6 +126,9 @@ export default {
 	},
 	computed: {
 		tableRowNames() {
+			if (!this.tableRows || this.tableRows.length === 0) {
+				return [];
+			}
 			return this.tableRows[0].map(row => row.label)
 		}
 	}

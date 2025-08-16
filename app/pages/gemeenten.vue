@@ -1,7 +1,7 @@
 <template>
 	<div class="flex flex-col gap-4 p-4">
 
-		<div class="flex justify-between gap-4 w-full">
+		<div class="flex flex-col lg:flex-row justify-between gap-4 w-full">
 			<card class="w-full h-81">
 				<chart id="1" :chart-options="stackedBarChart" />
 			</card>
@@ -11,7 +11,7 @@
 			</card>
 		</div>
 
-		<table-el />
+		<table-el :tableRows="townsTableData" @row-click="handleRowClick" />
 	</div>
 </template>
 
@@ -21,7 +21,7 @@ export default {
 	name: "gemeenten",
 	data() {
 		return {
-			gemeenten: [],
+			towns: [],
 			stackedBarChart: {
 				xAxis: {
 					type: 'category',
@@ -129,6 +129,42 @@ export default {
 
 			}
 		}
+	},
+	computed: {
+		townsTableData() {
+
+			if (!this.towns || this.towns.length === 0) {
+				return [];
+			}
+
+			console.log(1);
+
+
+			return this.towns.map(town => {
+				return [
+					{ label: 'ID', value: town.id },
+					{ label: 'Aantal Mannen', value: town.properties.aantal_mannen },
+					{ label: 'Aantal Vrouwen', value: town.properties.aantal_vrouwen },
+					{ label: 'Postcode', value: town.properties.postcode }
+				];
+			});
+		}
+	},
+	methods: {
+		async fetchTowns() {
+			const response = await $fetch('/api/gemeenten', {
+				method: 'GET'
+			});
+
+			this.towns = response.features;
+		},
+		handleRowClick(row) {
+			const postcode = row.find(column => column.label === 'Postcode').value;
+			this.$router.push(`/?postcode=${postcode}`);
+		}
+	},
+	mounted() {
+		this.fetchTowns();
 	},
 }
 </script>

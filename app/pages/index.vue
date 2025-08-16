@@ -82,7 +82,7 @@ export default {
 		}
 	},
 	methods: {
-		async queryTown(query) {
+		async fetchTown(query) {
 
 			const response = await $fetch('/api/gemeenten', {
 				method: 'GET',
@@ -90,6 +90,9 @@ export default {
 			});
 
 			this.town = response.features[0];
+
+			console.log(this.town.properties.postcode);
+
 
 			this.$router.push(`/?postcode=${this.town.properties.postcode}`);
 		}
@@ -100,7 +103,7 @@ export default {
 			query.postcode = this.$route.query.postcode
 		}
 
-		this.queryTown(query)
+		this.fetchTown(query)
 	}
 }
 
