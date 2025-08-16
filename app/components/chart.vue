@@ -12,7 +12,7 @@ export default {
 		return {
 			chart: null
 		}
-	},	
+	},
 	props: {
 		id: {
 			type: String,
@@ -21,9 +21,21 @@ export default {
 		chartOptions: {
 			type: Object,
 			default: {}
+		},
+		geoJsonToRegister: {
+			type: Object,
+			default: null
 		}
 	},
 	mounted() {
+
+		if (this.chartOptions.geo && !this.geoJsonToRegister) {
+			throw new Error('GeoJSON data is required for map charts');
+		}
+
+		if (this.geoJsonToRegister) {
+			echarts.registerMap(`region-${this.id}`, this.geoJsonToRegister);
+		}
 
 		const chartElement = document.getElementById(this.id)
 
