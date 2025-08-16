@@ -1,10 +1,10 @@
 <template>
 
 	<div class="lg:col-span-9">
-		<div class="flex flex-col mt-4">
+		<div class="flex flex-col">
 			<div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
 				<div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-					<div class="overflow-hidden ring-1 ring-black ring-opacity-5 md:rounded-xl">
+					<card class="overflow-hidden md:rounded-xl">
 						<table class="min-w-full bg-white lg:divide-y lg:divide-gray-200">
 							<thead class="hidden lg:table-header-group">
 								<tr>
@@ -32,7 +32,7 @@
 								</tr>
 							</tbody>
 						</table>
-					</div>
+					</card>
 				</div>
 			</div>
 		</div>
