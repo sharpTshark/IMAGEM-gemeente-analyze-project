@@ -1,8 +1,9 @@
 <template>
 	<div class="flex flex-col gap-4 p-4">
 
-		<div class="w-full flex justify-end">
+		<div class="w-full flex justify-end gap-4">
 			<select-el v-model="selectedFetchLimit" :options="fetchLimitOptions" />
+			<select-el v-model="selectedFetchYear" :options="fetchYearOptions" />
 		</div>
 
 		<div class="flex flex-col lg:flex-row justify-between gap-4 w-full h-[50vh]">
@@ -39,6 +40,18 @@ export default {
 				{ label: '10 results', value: 10 },
 				{ label: '100 results', value: 100 },
 				{ label: '1000 results', value: 1000 }
+			],
+			selectedFetchYear: 2023,
+			fetchYearOptions: [
+				{ label: '2015', value: 2015 },
+				{ label: '2016', value: 2016 },
+				{ label: '2017', value: 2017 },
+				{ label: '2018', value: 2018 },
+				{ label: '2019', value: 2019 },
+				{ label: '2020', value: 2020 },
+				{ label: '2021', value: 2021 },
+				{ label: '2022', value: 2022 },
+				{ label: '2023', value: 2023 }
 			],
 			propertiesKeys: [
 				{
@@ -107,16 +120,6 @@ export default {
 		},
 		lineChart() {
 			return {
-				dataZoom: [{
-					type: 'inside',
-					id: 'insideX',
-					xAxisIndex: 0,
-					start: 0,
-					end: 50,
-					zoomOnMouseWheel: false,
-					moveOnMouseMove: true,
-					moveOnMouseWheel: true
-				}],
 				tooltip: {
 					trigger: 'axis'
 				},
@@ -259,21 +262,22 @@ export default {
 		}
 	},
 	mounted() {
-
-		if (this.route.query.limit) {
-			this.selectedFetchLimit = parseInt(this.route.query.limit)
-		} else {
-			this.selectedFetchLimit = 10
-		}
-
 		this.fetchTowns({
-			limit: this.selectedFetchLimit
+			limit: this.selectedFetchLimit,
+			year: this.selectedFetchYear
 		});
 	},
 	watch: {
 		selectedFetchLimit() {
 			this.fetchTowns({
-				limit: this.selectedFetchLimit
+				limit: this.selectedFetchLimit,
+				year: this.selectedFetchYear
+			});
+		},
+		selectedFetchYear() {
+			this.fetchTowns({
+				limit: this.selectedFetchLimit,
+				year: this.selectedFetchYear
 			});
 		}
 	}
