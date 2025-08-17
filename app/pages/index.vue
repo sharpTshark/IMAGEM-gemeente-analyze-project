@@ -90,10 +90,6 @@ export default {
 			});
 
 			this.town = response.features[0];
-
-			console.log(this.town.properties.postcode);
-
-
 			this.$router.push(`/?postcode=${this.town.properties.postcode}`);
 		}
 	},

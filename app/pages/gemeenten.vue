@@ -1,12 +1,12 @@
 <template>
 	<div class="flex flex-col gap-4 p-4">
 
-		<div class="flex flex-col lg:flex-row justify-between gap-4 w-full">
-			<card class="w-full h-81">
-				<chart id="1" :chart-options="stackedBarChart" />
+		<div class="flex flex-col lg:flex-row justify-between gap-4 w-full h-[50vh]">
+			<card class="w-full full">
+				<chart id="1" :chart-options="stackedBarChart" @click="handleChartClick" />
 			</card>
 
-			<card class="w-full h-81">
+			<card class="w-full h-full">
 				<chart id="2" :chart-options="lineChart" />
 			</card>
 		</div>
@@ -16,7 +16,6 @@
 </template>
 
 <script>
-import { LinesChart } from 'echarts/charts';
 
 
 export default {
@@ -24,55 +23,66 @@ export default {
 	data() {
 		return {
 			towns: [],
-			stackedBarChart: {
-				xAxis: {
-					type: 'category',
-					data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+			propertiesKeys: [
+				{
+					name: 'aantal_inwoners_0_tot_15_jaar',
+					label: '0 tot 15 jaar'
 				},
-				yAxis: {
-					type: 'value',
+				{
+					name: 'aantal_inwoners_15_tot_25_jaar',
+					label: '15 tot 25 jaar'
 				},
-				toolbox: {
-					feature: {
-						saveAsImage: {}
-					}
+				{
+					name: 'aantal_inwoners_25_tot_45_jaar',
+					label: '25 tot 45 jaar'
 				},
-				series: [
-					{
-						data: [120, 200, 150, 80, 70, 110, 130],
-						type: 'bar',
-						stack: 'a',
-						name: 'a'
-					},
-					{
-						data: [10, 46, 64, '-', 0, '-', 0],
-						type: 'bar',
-						stack: 'a',
-						name: 'b'
-					},
-					{
-						data: [30, '-', 0, 20, 10, '-', 0],
-						type: 'bar',
-						stack: 'a',
-						name: 'c'
-					},
-					{
-						data: [30, '-', 0, 20, 10, '-', 0],
-						type: 'bar',
-						stack: 'b',
-						name: 'd'
-					},
-					{
-						data: [10, 20, 150, 0, '-', 50, 10],
-						type: 'bar',
-						stack: 'b',
-						name: 'e'
-					}
-				]
-			},
+				{
+					name: 'aantal_inwoners_45_tot_65_jaar',
+					label: '45 tot 65 jaar'
+				},
+				{
+					name: 'aantal_inwoners_65_jaar_en_ouder',
+					label: '65 jaar en ouder'
+				}
+			]
 		}
 	},
 	computed: {
+		PeopleAgeDifferences() {
+			return this.propertiesKeys.map(key => {
+				return {
+					name: key.label,
+					type: 'bar',
+					stack: 'total',
+					barWidth: '60%',
+					label: {
+						show: true
+					},
+					data: this.towns.map(town => town.properties[key.name])
+				}
+			});
+		},
+		stackedBarChart() {
+			return {
+				tooltip: {
+					trigger: 'item',
+					formatter: function (params) {
+						return `Aantal: ${params.value}<br/>${params.seriesName}<br/>Postcode: ${params.name}`;
+					}
+				},
+				legend: {
+					selectedMode: false
+				},
+				yAxis: {
+					type: 'value'
+				},
+				xAxis: {
+					type: 'category',
+					data: this.towns.map(town => town.properties.postcode)
+				},
+				series: this.PeopleAgeDifferences
+			}
+		},
 		lineChart() {
 			return {
 				dataZoom: [{
@@ -105,7 +115,7 @@ export default {
 				xAxis: {
 					type: 'category',
 					boundaryGap: false,
-					data: ['voor 1945', '1945 1965', '1965 1975', '1975 1985', '1985 1995', '1995 2005', '2005 2015', '2015 en erna']
+					data: ['voor 1945', '1945 - 1965', '1965 - 1975', '1975 - 1985', '1985 - 1995', '1995 - 2005', '2005 - 2015', '2015 en erna']
 				},
 				yAxis: {
 					type: 'value'
@@ -125,9 +135,6 @@ export default {
 			if (!this.towns || this.towns.length === 0) {
 				return [];
 			}
-
-			console.log(1);
-
 
 			return this.towns.map(town => {
 				return [
@@ -175,6 +182,12 @@ export default {
 				return value;
 			});
 		},
+		handleChartClick(params) {
+			if (!params.name) return;
+
+			const postcode = params.name;
+			this.$router.push(`/?postcode=${postcode}`);
+		}
 	},
 	mounted() {
 		this.fetchTowns();

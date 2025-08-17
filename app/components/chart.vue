@@ -42,12 +42,16 @@ export default {
 		this.chart = echarts.init(chartElement)
 
 		this.chart.setOption(this.chartOptions)
+
+		this.chart.on('click', (params) => {
+			if (params && params.data) {
+				this.$emit('click', params);
+			}
+		});
 	},
 	watch: {
 		chartOptions: {
 			handler(newOptions) {
-				console.log('Chart options changed:', newOptions);
-
 				if (this.chart) {
 					this.chart.setOption(newOptions);
 				}
