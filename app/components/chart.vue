@@ -53,10 +53,18 @@ export default {
 		chartOptions: {
 			handler(newOptions) {
 				if (this.chart) {
+					this.chart.clear();
 					this.chart.setOption(newOptions);
 				}
 			},
 			deep: true
+		},
+		geoJsonToRegister(newGeoJson) {
+			if (this.chart && newGeoJson) {
+				echarts.registerMap(`region-${this.id}`, newGeoJson);
+				this.chart.clear();
+				this.chart.setOption(this.chartOptions);
+			}
 		}
 	},
 };
