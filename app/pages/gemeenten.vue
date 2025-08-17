@@ -1,6 +1,10 @@
 <template>
 	<div class="flex flex-col gap-4 p-4">
 
+		<div class="w-full flex justify-end">
+			<select-el v-model="selectedFetchLimit" :options="fetchLimitOptions" />
+		</div>
+
 		<div class="flex flex-col lg:flex-row justify-between gap-4 w-full h-[50vh]">
 			<card class="w-full full">
 				<chart id="1" :chart-options="stackedBarChart" @click="handleChartClick" />
@@ -11,7 +15,13 @@
 			</card>
 		</div>
 
-		<table-el :tableRows="townsTableData" @row-click="handleRowClick" />
+		<div class="flex gap-4">
+			<table-el :tableRows="townsTableData" @row-click="handleRowClick" />
+
+			<card class="w-full h-72">
+				<chart v-if="towns.length" id="3" :chartOptions="mapChart" :geoJsonToRegister="townsGeoData" />
+			</card>
+		</div>
 	</div>
 </template>
 
@@ -22,7 +32,14 @@ export default {
 	name: "gemeenten",
 	data() {
 		return {
+			route: useRoute(),
 			towns: [],
+			selectedFetchLimit: 10,
+			fetchLimitOptions: [
+				{ label: '10 results', value: 10 },
+				{ label: '100 results', value: 100 },
+				{ label: '1000 results', value: 1000 }
+			],
 			propertiesKeys: [
 				{
 					name: 'aantal_inwoners_0_tot_15_jaar',
@@ -58,12 +75,17 @@ export default {
 					label: {
 						show: true
 					},
-					data: this.towns.map(town => town.properties[key.name])
+					data: this.towns.map(town => town.properties[key.name] > 0 ? town.properties[key.name] : 0)
 				}
 			});
 		},
 		stackedBarChart() {
 			return {
+				toolbox: {
+					feature: {
+						saveAsImage: {}
+					}
+				},
 				tooltip: {
 					trigger: 'item',
 					formatter: function (params) {
@@ -139,17 +161,64 @@ export default {
 			return this.towns.map(town => {
 				return [
 					{ label: 'ID', value: town.id },
-					{ label: 'Aantal Mannen', value: town.properties.aantal_mannen },
-					{ label: 'Aantal Vrouwen', value: town.properties.aantal_vrouwen },
 					{ label: 'Postcode', value: town.properties.postcode }
 				];
 			});
+		},
+		mapChart() {
+			return {
+				toolbox: {
+					feature: {
+						saveAsImage: {}
+					}
+				},
+				geo: {
+					map: 'region-3',
+					roam: true,
+					aspectScale: Math.cos((47 * Math.PI) / 180),
+					nameProperty: 'postcode',
+					label: {
+						show: true,
+						textBorderColor: '#fff',
+						textBorderWidth: 2
+					}
+				},
+				tooltip: {},
+				series: [
+					{
+						type: 'graph',
+						coordinateSystem: 'geo',
+						edgeSymbol: ['none', 'arrow'],
+						edgeSymbolSize: 5,
+						lineStyle: {
+							color: '#718adbff',
+							opacity: 1
+						}
+					}
+				]
+			}
+		},
+
+		townsGeoData() {
+			if (!this.towns || this.towns.length === 0) {
+				return null;
+			}
+
+			return {
+				type: 'FeatureCollection',
+				features: this.towns.map(town => ({
+					type: 'Feature',
+					properties: town.properties,
+					geometry: town.geometry
+				}))
+			};
 		}
 	},
 	methods: {
-		async fetchTowns() {
+		async fetchTowns(query) {
 			const response = await $fetch('/api/gemeenten', {
-				method: 'GET'
+				method: 'GET',
+				query
 			});
 
 			this.towns = response.features;
@@ -190,7 +259,23 @@ export default {
 		}
 	},
 	mounted() {
-		this.fetchTowns();
+
+		if (this.route.query.limit) {
+			this.selectedFetchLimit = parseInt(this.route.query.limit)
+		} else {
+			this.selectedFetchLimit = 10
+		}
+
+		this.fetchTowns({
+			limit: this.selectedFetchLimit
+		});
 	},
+	watch: {
+		selectedFetchLimit() {
+			this.fetchTowns({
+				limit: this.selectedFetchLimit
+			});
+		}
+	}
 }
 </script>

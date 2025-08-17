@@ -27,6 +27,11 @@ export default {
 	computed: {
 		pieChartOptions() {
 			return {
+				toolbox: {
+					feature: {
+						saveAsImage: {}
+					}
+				},
 				tooltip: {
 					trigger: 'item'
 				},
@@ -47,6 +52,11 @@ export default {
 		},
 		mapChart() {
 			return {
+				toolbox: {
+					feature: {
+						saveAsImage: {}
+					}
+				},
 				geo: {
 					map: 'region-2',
 					roam: true,
